@@ -1,5 +1,52 @@
+import { getToken } from "../api/storage";
+
+import AuthContext from "@/context/Authcontext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, StatusBar, View } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
-  return <Stack />;
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  const checkToken = async () => {
+    const token = await getToken();
+    if (token) setIsAuthenticated(true);
+    setReady(true);
+  };
+
+  useEffect(() => {
+    checkToken();
+  }, []);
+
+  if (!ready) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+        <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+        <QueryClientProvider client={queryClient}>
+          <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+            <Stack screenOptions={{ headerShown: false }}>
+              {isAuthenticated ? (
+                <Stack.Screen name="(protected)" />
+              ) : (
+                <Stack.Screen name="(auth)" />
+              )}
+            </Stack>
+          </AuthContext.Provider>
+        </QueryClientProvider>
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
 }

@@ -11,6 +11,7 @@ import { router } from "expo-router";
 
 import AuthContext from "@/context/Authcontext";
 import { storeToken } from "../../api/storage";
+import { register as registerUser } from "../../api/auth";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -21,10 +22,23 @@ export default function Register() {
   const handleRegister = async () => {
     if (username.trim() && password.trim() && confirmPassword.trim()) {
       if (password === confirmPassword) {
-        // TODO: Replace with real API register and store returned token
-        await storeToken("dummy-token-" + Date.now());
-        setIsAuthenticated(true);
-        router.replace("/(protected)/testhomepage");
+        try {
+          // Call your real backend API
+          const response = await registerUser({
+            username,
+            password,
+            image: null // You can add image upload later
+          });
+          
+          if (response.success) {
+            setIsAuthenticated(true);
+            router.replace("/(protected)/testhomepage");
+          } else {
+            console.log("Registration failed:", response.error);
+          }
+        } catch (error) {
+          console.error("Registration error:", error);
+        }
       } else {
         console.log("Passwords don't match");
       }

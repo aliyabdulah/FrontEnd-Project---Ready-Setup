@@ -2,14 +2,14 @@ import axios from "axios";
 import { storeToken } from "./storage";
 
 export const api = axios.create({
-  baseURL: "TO_BE_COMPLETED", // e.g., https://api.example.com
+  baseURL: "http://localhost:8000", // Your backend server URL
 });
 
 // REGISTER
 export const register = async (userInfo: {
   username: string;
   password: string;
-  image: string | null; // file URI
+  image: string | null;
 }) => {
   const formData = new FormData();
   formData.append("username", userInfo.username);
@@ -25,8 +25,7 @@ export const register = async (userInfo: {
     );
   }
 
-  // TODO: replace endpoint path
-  const { data } = await api.post("TO_BE_COMPLETED", formData, {
+  const { data } = await api.post("/api/auth/register", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
@@ -36,8 +35,7 @@ export const register = async (userInfo: {
 
 // LOGIN
 export const login = async (userInfo: { username: string; password: string }) => {
-  // TODO: replace endpoint path
-  const { data } = await api.post("TO_BE_COMPLETED", userInfo);
+  const { data } = await api.post("/api/auth/login", userInfo);
   if (data?.token) await storeToken(data.token);
   return data;
 };

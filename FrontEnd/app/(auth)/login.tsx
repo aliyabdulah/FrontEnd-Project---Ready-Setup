@@ -10,7 +10,7 @@ import {
 import { router } from "expo-router";
 import AuthContext from "@/context/Authcontext";
 import { storeToken } from "../../api/storage";
-
+import { login as loginUser } from "../../api/auth";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -19,10 +19,22 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (username.trim() && password.trim()) {
-      // TODO: Replace with real API login and store returned token
-      await storeToken("dummy-token-" + Date.now());
-      setIsAuthenticated(true);
-      router.replace("/(protected)/testhomepage");
+      try {
+        // Call your real backend API
+        const response = await loginUser({
+          username,
+          password
+        });
+        
+        if (response.success) {
+          setIsAuthenticated(true);
+          router.replace("/(protected)/testhomepage");
+        } else {
+          console.log("Login failed:", response.error);
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+      }
     }
   };
 
